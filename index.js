@@ -1,12 +1,13 @@
 let input = document.querySelector("input");
 let addButton = document.querySelector("button");
 let ulList = document.querySelector("ul");
+let liItems = document.getElementsByTagName("li");
 let items = {};
 let id = localStorage.length;
 
 function addItemLocalStorage() {
-    localStorage.setItem(id, JSON.stringify(items[id]));
-};
+  localStorage.setItem(id, JSON.stringify(items[id]));
+}
 
 function createItem(text) {
   let item = {
@@ -16,9 +17,9 @@ function createItem(text) {
   items[id] = item;
   addItemLocalStorage();
   id++;
-};
+}
 
-addButton.addEventListener("click", event => {
+addButton.addEventListener("click", (event) => {
   event.preventDefault();
 
   let text = input.value;
@@ -44,23 +45,29 @@ addButton.addEventListener("click", event => {
   createItem(text);
 });
 
-ulList.addEventListener("click", event => {
+ulList.addEventListener("click", (event) => {
+  const liIndex = [...ulList.children].indexOf(event.target);
   if (event.target.tagName === "LI") {
     event.target.classList.toggle("checked");
+    items[liIndex].checked ? (items[liIndex].checked = false) : (items[liIndex].checked = true);
   } else if (event.target.tagName === "SPAN") {
+    const spanIndex = [...ulList.children].indexOf(event.target.parentElement);
+    const key = localStorage.key(spanIndex);
+    localStorage.removeItem(localStorage.key(spanIndex));
     event.target.parentElement.remove();
   }
 });
 
-function renderLocalStorage() {
-    let li = document.createElement("li");
-
-}
 window.onload = () => {
-    for(let i = 0; i < localStorage.length; i++) {
-        let item = JSON.parse(localStorage[i]).newLiElement;
-        let li = document.createElement("li");
-        li.innerHTML = item;
-        ulList.append(li);
-    };
+  let keys = Object.keys(localStorage);
+  for(let key of keys) {
+    let item = JSON.parse(localStorage[key]).newLiElement;
+    let li = document.createElement("li");
+    let span = document.createElement("span");
+    span.innerHTML = "\u00D7";
+    span.className = "close";
+    li.innerHTML = item;
+    li.append(span);
+    ulList.append(li);
+  }
 };
