@@ -5,8 +5,8 @@ let liItems = document.getElementsByTagName("li");
 let items = {};
 let id = localStorage.length;
 
-function addItemLocalStorage() {
-  localStorage.setItem(id, JSON.stringify(items[id]));
+function addItemLocalStorage(index) {
+  localStorage.setItem(index, JSON.stringify(items[index]));
 }
 
 function createItem(text) {
@@ -15,7 +15,7 @@ function createItem(text) {
     checked: false,
   };
   items[id] = item;
-  addItemLocalStorage();
+  addItemLocalStorage(id);
   id++;
 }
 
@@ -50,24 +50,30 @@ ulList.addEventListener("click", (event) => {
   if (event.target.tagName === "LI") {
     event.target.classList.toggle("checked");
     items[liIndex].checked ? (items[liIndex].checked = false) : (items[liIndex].checked = true);
+    addItemLocalStorage(liIndex);
   } else if (event.target.tagName === "SPAN") {
     const spanIndex = [...ulList.children].indexOf(event.target.parentElement);
     const key = localStorage.key(spanIndex);
-    localStorage.removeItem(localStorage.key(spanIndex));
+    localStorage.removeItem(key);
     event.target.parentElement.remove();
   }
 });
 
 window.onload = () => {
-  let keys = Object.keys(localStorage);
+  let keys = Object.keys(localStorage).sort((a, b) => a - b);
   for(let key of keys) {
+    items[key] = JSON.parse(localStorage[key]); //add item from storage to object
+
     let item = JSON.parse(localStorage[key]).newLiElement;
+    let checked = JSON.parse(localStorage[key]).checked;
+
     let li = document.createElement("li");
     let span = document.createElement("span");
     span.innerHTML = "\u00D7";
     span.className = "close";
     li.innerHTML = item;
     li.append(span);
+    if(checked) li.classList = "checked";
     ulList.append(li);
   }
 };
