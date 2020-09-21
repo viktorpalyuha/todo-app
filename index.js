@@ -4,6 +4,7 @@ let ulList = document.querySelector("ul");
 let liItems = document.getElementsByTagName("li");
 let items = {};
 let id = localStorage.length;
+let keys = Object.keys(localStorage).sort();
 
 function addItemLocalStorage(index) {
   localStorage.setItem(index, JSON.stringify(items[index]));
@@ -41,6 +42,7 @@ addButton.addEventListener("click", (event) => {
 
   input.value = "";
 
+  keys.push(id);
   //create item object and add it to items
   createItem(text);
 });
@@ -49,23 +51,30 @@ ulList.addEventListener("click", (event) => {
   const liIndex = [...ulList.children].indexOf(event.target);
   if (event.target.tagName === "LI") {
     event.target.classList.toggle("checked");
-    items[liIndex].checked ? (items[liIndex].checked = false) : (items[liIndex].checked = true);
-    addItemLocalStorage(liIndex);
+    items[keys[liIndex]].checked
+      ? (items[keys[liIndex]].checked = false)
+      : (items[keys[liIndex]].checked = true);
+    
+    addItemLocalStorage(keys[liIndex]);
   } else if (event.target.tagName === "SPAN") {
     const spanIndex = [...ulList.children].indexOf(event.target.parentElement);
-    const key = localStorage.key(spanIndex);
+    const key = keys[spanIndex];
     localStorage.removeItem(key);
-    event.target.parentElement.remove();
+    keys = keys.filter(item => item !== key);
+    event.target.parentElement.remove(); 
   }
 });
 
 window.onload = () => {
-  let keys = Object.keys(localStorage).sort((a, b) => a - b);
-  for(let key of keys) {
+  for (let key of keys) {
     items[key] = JSON.parse(localStorage[key]); //add item from storage to object
+  }
 
-    let item = JSON.parse(localStorage[key]).newLiElement;
-    let checked = JSON.parse(localStorage[key]).checked;
+  localStorage.clear();
+
+  for (let key in items) {
+    let item = items[key].newLiElement;
+    let checked = items[key].checked;
 
     let li = document.createElement("li");
     let span = document.createElement("span");
@@ -73,7 +82,11 @@ window.onload = () => {
     span.className = "close";
     li.innerHTML = item;
     li.append(span);
-    if(checked) li.classList = "checked";
+    if (checked) li.classList = "checked";
     ulList.append(li);
+  }
+
+  for (let key of keys) {
+    addItemLocalStorage(key, items[key]);
   }
 };
